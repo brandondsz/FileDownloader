@@ -1,36 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PlayGround
+﻿namespace FileDownloader
 {
+    using System;
+    using System.Text;
+
+    /// <summary>
+    /// Display formatter for different data types
+    /// </summary>
     public static class DisplayFormatHelper
     {
-
         #region Memory
-        static readonly string[] suffixes = { "Bytes", "KB", "MB", "GB", "TB", "PB" };
-        public static string FormatSize(Int64 bytes)
+        private static readonly string[] FileSizeSuffixes = { "Bytes", "KB", "MB", "GB", "TB", "PB" };
+        public static string FormatSize(long bytes)
         {
             int counter = 0;
-            decimal number = (decimal)bytes;
+            decimal number = bytes;
             while (Math.Round(number / 1024) >= 1)
             {
                 number = number / 1024;
                 counter++;
             }
-            return string.Format("{0:n1}{1}", number, suffixes[counter]);
+            return string.Format("{0:n1}{1}", number, FileSizeSuffixes[counter]);
         }
         #endregion
 
         #region Time
         public static string TimeSpanDisplayFormat(TimeSpan span)
         {
-
             if (span == TimeSpan.Zero) return "0 minutes";
 
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             if (span.Days > 0)
                 sb.AppendFormat("{0} day{1} ", span.Days, span.Days > 1 ? "s" : String.Empty);
             if (span.Hours > 0)

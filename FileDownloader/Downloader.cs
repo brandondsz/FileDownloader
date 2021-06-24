@@ -7,7 +7,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlayGround
+namespace FileDownloader
 {
     public static class Downloader
     {
@@ -16,18 +16,18 @@ namespace PlayGround
         public delegate void ProgressUpdate(string message);
         public static event ProgressUpdate ProgressUpdateEvent;
 
-        public static DownloadResult Download(String fileUrl, String destinationFolderPath, int numberOfParallelDownloads)
+        public static DownloadResult Download(string fileUrl, string destinationFolderPath, int numberOfParallelDownloads)
         {
             downloadedChunks = 0;
             Uri uri = new Uri(fileUrl);
             //Input validation
             if (!Directory.Exists(destinationFolderPath))
             {
-                throw new Exception($"Invalid value for destinationFolderPath. Directory {destinationFolderPath} does not exist.");
+                throw new FriendlyException($"Invalid value for destinationFolderPath. Directory {destinationFolderPath} does not exist.");
             }
             if (numberOfParallelDownloads <= 0)
             {
-                throw new Exception("Invalid value for numberOfParallelDownloads. Please enter a value greater than zero.");
+                throw new FriendlyException("Invalid value for numberOfParallelDownloads. Please enter a value greater than zero.");
             }
             //Calculate destination path  
             String destinationFilePath = Path.Combine(destinationFolderPath, uri.Segments.Last());
@@ -42,7 +42,7 @@ namespace PlayGround
             {
                 if (!webResponse.Headers.AllKeys.Contains("Content-Length"))
                 {
-                    throw new Exception("Unable to download file. Content-Length not present.");
+                    throw new FriendlyException("Unable to download file. Content-Length not present.");
                 }
                 responseLength = long.Parse(webResponse.Headers.Get("Content-Length"));
                 result.Size = responseLength;
@@ -55,7 +55,7 @@ namespace PlayGround
             }
             if (responseLength < numberOfParallelDownloads)
             {
-                throw new Exception($"The file is too small to be divided into chunks to have {numberOfParallelDownloads} parallel downloads. Please select a value less than {numberOfParallelDownloads}.");
+                throw new FriendlyException($"The file is too small to be divided into chunks to have {numberOfParallelDownloads} parallel downloads. Please select a value less than {numberOfParallelDownloads}.");
             }
             UpdateProgress("Dividing in to chunks...");
 
@@ -65,7 +65,7 @@ namespace PlayGround
             List<Range> readRanges = new List<Range>();
             for (int chunk = 0; chunk < numberOfParallelDownloads - 1; chunk++)
             {
-                var range = new Range()
+                Range range = new Range()
                 {
                     Start = chunk * (responseLength / numberOfParallelDownloads),
                     End = ((chunk + 1) * (responseLength / numberOfParallelDownloads)) - 1
@@ -90,14 +90,14 @@ namespace PlayGround
             UpdateProgress("Starting downloads...");
             Parallel.ForEach(readRanges, new ParallelOptions() { MaxDegreeOfParallelism = numberOfParallelDownloads }, readRange =>
             {
-                var chunkStart = DateTime.Now;
+                DateTime chunkStart = DateTime.Now;
                 HttpWebRequest httpWebRequest = HttpWebRequest.Create(fileUrl) as HttpWebRequest;
                 httpWebRequest.Method = "GET";
                 httpWebRequest.AddRange(readRange.Start, readRange.End);
                 using (HttpWebResponse httpWebResponse = httpWebRequest.GetResponse() as HttpWebResponse)
                 {
                     String tempFilePath = Path.GetTempFileName();
-                    using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.Write))
+                    using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.Write))
                     {
                         httpWebResponse.GetResponseStream().CopyTo(fileStream);
                         tempFilesDictionary.TryAdd(readRange.Start, tempFilePath);
@@ -117,7 +117,7 @@ namespace PlayGround
             #region Merge to single file  
             using (FileStream destinationStream = new FileStream(destinationFilePath, FileMode.Append))
             {
-                foreach (var tempFile in tempFilesDictionary.OrderBy(b => b.Key))
+                foreach (KeyValuePair<long, string> tempFile in tempFilesDictionary.OrderBy(b => b.Key))
                 {
                     byte[] tempFileBytes = File.ReadAllBytes(tempFile.Value);
                     destinationStream.Write(tempFileBytes, 0, tempFileBytes.Length);
@@ -138,7 +138,7 @@ namespace PlayGround
         {
             if (ProgressUpdateEvent == null)
                 return;
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             //Given the size of the chunk just downloaded and the chunks remaining, calculate the time remaining for the download to complete.
             sb.Append($"{downloadedChunks * 100 / total}% - Speed {DisplayFormatHelper.FormatSize((long)(chunkSize / chunkTime.TotalSeconds))}ps");
             if (total > downloadedChunks)

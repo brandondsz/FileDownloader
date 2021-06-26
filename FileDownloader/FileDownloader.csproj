@@ -47,7 +47,8 @@
     <Compile Include="Downloader.cs" />
     <Compile Include="DisplayFormatHelper.cs" />
     <Compile Include="FriendlyException.cs" />
-    <Compile Include="Models.cs" />
+    <Compile Include="Models\DataRange.cs" />
+    <Compile Include="Models\DownloadResult.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

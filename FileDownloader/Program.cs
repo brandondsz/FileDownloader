@@ -5,6 +5,7 @@ namespace FileDownloader
 {
     using System;
     using System.Configuration;
+    using FileDownloader.Models;
 
     /// <summary>
     /// Program class
@@ -24,10 +25,10 @@ namespace FileDownloader
                 do
                 {
                     Print("How many parallel downloads do you want to execute?");
+                    int numOfParallelDownloads = int.Parse(Console.ReadLine());
+                    DownloadResult result = Downloader.Download(ConfigurationManager.AppSettings["fileUrl"], ConfigurationManager.AppSettings["downloadLocation"], numOfParallelDownloads);
 
-                    DownloadResult result = Downloader.Download(ConfigurationManager.AppSettings["fileUrl"], ConfigurationManager.AppSettings["downloadLocation"], int.Parse(Console.ReadLine()));
-
-                    Print($"Download Summary:\n FileSize: {DisplayFormatHelper.FormatSize(result.Size)}\n Number of chunks: {result.ParallelDownloads}" +
+                    Print($"Download Summary:\n FileSize: {DisplayFormatHelper.FormatSize(result.Size)}\n Number of chunks: {numOfParallelDownloads}" +
                         $"\n Chunk size: {DisplayFormatHelper.FormatSize(result.ChunkSize)}\n Time taken : {DisplayFormatHelper.TimeSpanDisplayFormat(result.TimeTaken)} \n Downloaded File: {result.FilePath}");
 
                     Print("Try again? (Y/N)");

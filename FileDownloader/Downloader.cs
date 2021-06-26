@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿/// <summary>
+/// 
+/// </summary>
 namespace FileDownloader
 {
+    using FileDownloader.Models;
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Net;
+    using System.Text;
+    using System.Threading.Tasks;
     public static class Downloader
     {
         private static float downloadedChunks = 0;
@@ -62,10 +65,10 @@ namespace FileDownloader
             ConcurrentDictionary<long, string> tempFilesDictionary = new ConcurrentDictionary<long, string>();
 
             #region Calculate ranges  
-            List<Range> readRanges = new List<Range>();
+            List<DataRange> readRanges = new List<DataRange>();
             for (int chunk = 0; chunk < numberOfParallelDownloads - 1; chunk++)
             {
-                Range range = new Range()
+                DataRange range = new DataRange()
                 {
                     Start = chunk * (responseLength / numberOfParallelDownloads),
                     End = ((chunk + 1) * (responseLength / numberOfParallelDownloads)) - 1
@@ -73,13 +76,12 @@ namespace FileDownloader
                 readRanges.Add(range);
             }
 
-            readRanges.Add(new Range()
+            readRanges.Add(new DataRange()
             {
                 Start = readRanges.Any() ? readRanges.Last().End + 1 : 0,
                 End = responseLength - 1
             });
             result.ChunkSize = readRanges[0].End - readRanges[0].Start;
-            result.ParallelDownloads = numberOfParallelDownloads;
             #endregion
             UpdateProgress($"Divided into {numberOfParallelDownloads} chunks of {readRanges[0].End - readRanges[0].Start} bytes each.");
             DateTime startTime = DateTime.Now;

@@ -1,4 +1,7 @@
-﻿namespace FileDownloader
+﻿// <copyright file="DisplayFormatHelper.cs" company="BDZ Corp">
+// Copyright (c) BDZ Corp. All rights reserved.
+// </copyright>
+namespace FileDownloader
 {
     using System;
     using System.Text;
@@ -9,7 +12,15 @@
     public static class DisplayFormatHelper
     {
         #region Memory
+        /// <summary>
+        //  File format suffixes
+        /// </summary>
         private static readonly string[] FileSizeSuffixes = { "Bytes", "KB", "MB", "GB", "TB", "PB" };
+        /// <summary>
+        /// File size formatting
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
         public static string FormatSize(long bytes)
         {
             int counter = 0;
@@ -24,6 +35,11 @@
         #endregion
 
         #region Time
+        /// <summary>
+        /// Time Span formatting
+        /// </summary>
+        /// <param name="span"></param>
+        /// <returns></returns>
         public static string TimeSpanDisplayFormat(TimeSpan span)
         {
             if (span == TimeSpan.Zero) return "0 minutes";
@@ -43,6 +59,11 @@
 
         }
 
+        /// <summary>
+        /// Time Span formatting
+        /// </summary>
+        /// <param name="seconds"></param>
+        /// <returns></returns>
         public static string TimeSpanDisplayFormat(long seconds)
         {
             return TimeSpanDisplayFormat(TimeSpan.FromTicks(seconds));

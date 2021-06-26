@@ -1,41 +1,55 @@
-﻿using System;
-using System.Configuration;
-
+﻿// <copyright file="Program.cs" company="BDZ Corp">
+// Copyright (c) BDZ Corp. All rights reserved.
+// </copyright>
 namespace FileDownloader
 {
-    class Program
+    using System;
+    using System.Configuration;
+
+    /// <summary>
+    /// Program class
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        /// <param name="args">Arguments to be passed to the application</param>
+        public static void Main(string[] args)
         {
             try
             {
-                Downloader.ProgressUpdateEvent += print;
+                Downloader.ProgressUpdateEvent += Print;
                 string retry;
                 do
                 {
-                    print("How many parallel downloads do you want to execute?");
+                    Print("How many parallel downloads do you want to execute?");
 
                     DownloadResult result = Downloader.Download(ConfigurationManager.AppSettings["fileUrl"], ConfigurationManager.AppSettings["downloadLocation"], int.Parse(Console.ReadLine()));
 
-                    print($"Download Summary:\n FileSize: {DisplayFormatHelper.FormatSize(result.Size)}\n Number of chunks: {result.ParallelDownloads}" +
+                    Print($"Download Summary:\n FileSize: {DisplayFormatHelper.FormatSize(result.Size)}\n Number of chunks: {result.ParallelDownloads}" +
                         $"\n Chunk size: {DisplayFormatHelper.FormatSize(result.ChunkSize)}\n Time taken : {DisplayFormatHelper.TimeSpanDisplayFormat(result.TimeTaken)} \n Downloaded File: {result.FilePath}");
 
-                    print("Try again? (Y/N)");
+                    Print("Try again? (Y/N)");
                     retry = Console.ReadLine();
-                } while (!string.IsNullOrWhiteSpace(retry) && retry.ToLower() == "y");
-
+                } 
+                while (!string.IsNullOrWhiteSpace(retry) && retry.ToLower() == "y");
             }
             catch (FriendlyException ex)
             {
                 Console.WriteLine(ex.Message);
             }
+
             Console.Read();
         }
 
-        private static void print(string s)
+        /// <summary>
+        /// Print a message to the console
+        /// </summary>
+        /// <param name="message">input string to be printed</param>
+        private static void Print(string message)
         {
-            Console.Out.WriteLineAsync(s);
+            Console.Out.WriteLineAsync(message);
         }
-
     }
 }
